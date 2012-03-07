@@ -1,5 +1,5 @@
 """
-remotes.json
+rpc.json
 
 Provide JSONRPC and JSONP implementations
 """
@@ -57,13 +57,15 @@ class Client(object):
         headers = {'X-flavour': 'JSONRPC'}
         resp = requests.post(
             self.url, data=payload, timeout=self.timeout)
-        print resp.text
         result = json.loads(resp.text)
         if reqid != result['id']:
             raise exceptions.IdError("API Endpoint returned with id:{ret}, expecting:{exp}".format(
                 ret=result['id'], exp=reqid))
         del result['id']
-        return result['result']
+        if resp.status_code == 200:
+            return result['result']
+        else:
+            raise exceptions.RemoteException(result['result'])
 
 
 class Server(object):
@@ -80,9 +82,16 @@ class Server(object):
         self.handler = handler
         self.httpd = simple_server.make_server(host, port, self.json_app)
 
+    def __repr__(self):
+        return "<JSON RPC Server on {host}:{port} calling {handler}> ".format(
+            host=self.host, port=self.port, handler=self.handler)
+
     def json_app(self, environ, start_response):
         """
-        Our JSON RPC WSGI App
+        Our JSON RPC WSGI App.
+
+        Decode and deserialize the POST data, locate the handler method,
+        ascertain the result and then return our JSON response.
         """
         post_env = environ.copy()
         post_env['QUERY_STRING'] = ''
@@ -91,9 +100,19 @@ class Server(object):
         method, args, kwargs = [json.loads(v) for v in [post.getvalue('method'),
                                                         post.getvalue('args'),
                                                         post.getvalue('kwargs')]]
-        result = getattr(self.handler, method)(*args, **kwargs)
         status = '200 OK'
         response_headers = [('Content-Type', 'application/json')]
+
+        if not hasattr(self.handler, method):
+            status = '500 Error'
+            result = 'Method Not Found... '
+        else:
+            try:
+                result = getattr(self.handler, method)(*args, **kwargs)
+            except Exception as err:
+                status = '500 Error'
+                result = '{error}: {msg}'.format(
+                    error=err.__class__.__name__, msg=err.message)
         start_response(status, response_headers)
         response = dict(id=json.loads(post.getvalue('id')),
                         result=result)
@@ -101,7 +120,9 @@ class Server(object):
 
     def serve(self):
         """
-        Start handling requests
+        Start handling requests.
+
+        It a Sub-Optimal idea to use this in any kind of production setting.
         """
         print("Serving JSON RPC on {host}:{port}".format(
             host=self.host, port=self.port))
