@@ -4,4 +4,6 @@ setup.py
 rpc/__init__.py
 rpc/__main__.py
 rpc/exceptions.py
-rpc/json.py
+rpc/jsonp.py
+rpc/jsonrpc.py
+rpc/servers.py

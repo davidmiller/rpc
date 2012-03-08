@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-VERSION = "0.0.1"
+VERSION = "0.0.1.1"
 
 setup(
     name = "rpc",
@@ -19,5 +19,7 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries"
         ],
-    packages = ['rpc']
+    packages = ['rpc'],
+    install_requires = ["WebOb==1.2b3",
+                "requests==0.10.6"]
     )
