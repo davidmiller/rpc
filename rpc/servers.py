@@ -4,7 +4,6 @@ rpc.servers
 Base class for server implementations
 """
 import functools
-import json
 from wsgiref import simple_server
 
 import webob
@@ -68,30 +67,49 @@ class HTTPServer(Server):
         Decode and deserialize the POST data, locate the handler method,
         ascertain the result and then return our JSON response.
         """
-        if request.method == 'GET':
-            params = request.GET
-        elif request.method == 'POST':
-            params = request.POST
-        else:
-            status = '500 Error'
+        if request.method not in ['GET', 'POST']:
             return ["Invalid HTTP Verb {verb}".format(verb=request.method)]
-        method, args, kwargs = [json.loads(v) for v in [params['method'],
-                                                        params.get('args', '[]'),
-                                                        params.get('kwargs', '{}')]]
-        status = '200 OK'
-        response_headers = [('Content-Type', 'application/json')]
-        if not hasattr(self.handler, method):
-            status = '500 Error'
-            result = 'Method Not Found... '
-        else:
-            try:
-                result = getattr(self.handler, method)(*args, **kwargs)
-            except Exception as err:
-                status = '500 Error'
-                result = '{error}: {msg}'.format(
-                    error=err.__class__.__name__, msg=err.message)
-        start_response(status, response_headers)
-        response = dict(result=result)
-        if 'id' in params:
-            response['id'] = json.loads(params['id'])
+        status, headers, response = self.procedure(request)
+        start_response(status, headers)
         return [self.parse_response(request, response)]
+
+
+
+    #
+    # Python Kwargs-y version
+    #
+    # @webobify
+    # def app(self, request, start_response):
+    #     """
+    #     Our JSON RPC WSGI App.
+
+    #     Decode and deserialize the POST data, locate the handler method,
+    #     ascertain the result and then return our JSON response.
+    #     """
+    #     if request.method == 'GET':
+    #         params = request.GET
+    #     elif request.method == 'POST':
+    #         params = request.POST
+    #     else:
+    #         status = '500 Error'
+    #         return ["Invalid HTTP Verb {verb}".format(verb=request.method)]
+    #     method, args, kwargs = [json.loads(v) for v in [params['method'],
+    #                                                     params.get('args', '[]'),
+    #                                                     params.get('kwargs', '{}')]]
+    #     status = '200 OK'
+    #     response_headers = [('Content-Type', 'application/json')]
+    #     if not hasattr(self.handler, method):
+    #         status = '500 Error'
+    #         result = 'Method Not Found... '
+    #     else:
+    #         try:
+    #             result = getattr(self.handler, method)(*args, **kwargs)
+    #         except Exception as err:
+    #             status = '500 Error'
+    #             result = '{error}: {msg}'.format(
+    #                 error=err.__class__.__name__, msg=err.message)
+    #     start_response(status, response_headers)
+    #     response = dict(result=result)
+    #     if 'id' in params:
+    #         response['id'] = json.loads(params['id'])
+    #     return [self.parse_response(request, response)]

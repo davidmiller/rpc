@@ -42,7 +42,13 @@ class Client(object):
         """
         if key in self.__dict__:
             return self.__dict__[key]
-        return lambda *a, **kw: self._apicall(key, *a, **kw)
+        return lambda *a, **kw: self._apicall(self, key, *a, **kw)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc, type, stack):
+        return
 
     def _get(self, headers, payload):
         """
@@ -58,15 +64,19 @@ class Client(object):
         return requests.post(self.url, data=payload, headers=headers,
                             timeout=self.timeout)
 
-    def _apicall(self, method, *args, **kwargs):
+    def _apicall(self, *args, **kwargs):
         """
         Make a JSONRPC call to a JSONRPC server
 
         Arguments:
         - `data`: string
         """
+        method = args[1]
+        params = args[2:]
         reqid = uuid.uuid4().hex
-        payload = dict(args=args, kwargs=kwargs, method=method, id=reqid)
+        if kwargs:
+            raise ValueError("Keyword arguments not supported by JSON RPC try passing a dict.")
+        payload = dict(params=params, id=reqid, method=method)
         payload = {k: json.dumps(v) for k, v in payload.items()}
         headers = {'X-flavour': 'JSONRPC'}
         if self.verb == "GET":
@@ -81,7 +91,7 @@ class Client(object):
                 ret=result['id'], exp=reqid))
         del result['id']
         if resp.status_code == 200:
-            return result['result']
+            return result
         else:
             raise exceptions.RemoteException(result['result'])
 
@@ -89,6 +99,36 @@ class Client(object):
 class Server(servers.HTTPServer):
     "A JSONRPC server"
     flavour = "JSON RPC"
+
+    def procedure(self, request):
+        """
+        JSON RPC procedure call - parse the params, call the procedure, and
+        return the appropriate values.
+
+        the procedure() method of HTTP Servers should return
+        status, headers, content
+        """
+        status = '200 OK'
+        headers = [('Content-Type', 'application/json')]
+        result, error = None, None
+        data = getattr(request, request.method)
+        method, params, reqid = [json.loads(v) for v in [data.get('method', 'null'),
+                                                         data.get('params', '[]'),
+                                                         data.get('id', 'null')]]
+        if not method:
+            error = "No Method specified"
+            return status, headers, dict(id=reqid, result=None, error=error)
+        if not hasattr(self.handler, method):
+            error = 'Method "{0}"" Not Found... '.format(method)
+        if error:
+            return status, headers, dict(id=id, result=result, error=error)
+        try:
+            result = getattr(self.handler, method)(*params)
+        except Exception as err:
+            error = '{error}: {msg}'.format(
+                error=err.__class__.__name__, msg=err.message)
+        return status, headers, dict(id=reqid, result=result, error=error)
+
     def parse_response(self, request, response):
         """
         Format the response:
