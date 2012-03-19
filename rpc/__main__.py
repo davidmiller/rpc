@@ -1,11 +1,11 @@
 """
-remotes.main
+rpc.main
 
 Allows invocation as
 
-$ python -m remotes
+$ python -m rpc
 """
-from remotes.cmdline import main
+from rpc.cmdline import main
 
 if __name__ == '__main__':
     main()

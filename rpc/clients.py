@@ -8,10 +8,13 @@ class RpcProxy(object):
     """
     A base implementation of the proxy pattern for RPC clients.
     """
+    def __init__(self):
+        self.url = "None"
+        self.flavour = "Base"
 
     def __repr__(self):
         return "<{flavour} Client for {url}>".format(
-            xurl=self.url, flavour=self.flavour)
+            url=self.url, flavour=self.flavour)
 
     def __enter__(self):
         return self

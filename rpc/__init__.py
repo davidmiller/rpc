@@ -1,5 +1,5 @@
 """
-remotes
+rpc
 
 namespacing and packageability
 """
