@@ -8,12 +8,13 @@ import uuid
 
 import requests
 
-from rpc import exceptions, servers
+from rpc import exceptions, clients, servers
 
-class Client(object):
+class Client(clients.RpcProxy):
     """
     This Proxy class implements a JSONRPC API
     """
+    flavour = "JSON RPC"
 
     def __init__(self, url, timeout=3, verb="POST"):
         """
@@ -26,29 +27,11 @@ class Client(object):
         self.timeout = timeout
         self.verb = verb
 
-    def __repr__(self):
-        return "<JSON RPC Client for {url}>".format(url=self.url)
-
     def __eq__(self, other):
         try:
             return self.url == other.url
         except AttributeError:
             return False
-
-    def __getattr__(self, key):
-        """
-        We allow anything not in self.__dict__ to be called as a method.
-        abstracting the reqests away.
-        """
-        if key in self.__dict__:
-            return self.__dict__[key]
-        return lambda *a, **kw: self._apicall(self, key, *a, **kw)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc, type, stack):
-        return
 
     def _get(self, headers, payload):
         """
@@ -95,6 +78,25 @@ class Client(object):
         else:
             raise exceptions.RemoteException(result['result'])
 
+
+def chain(*args):
+    """
+    Expects tuples of (URL, [{[timeout], [verb]}])
+
+    in order to return multiple clients.
+
+    Will return an iterable of clients.
+
+    Arguments:
+    - `*args`: tuples suitable for initialising RPC Clients
+    """
+    links = []
+    for constructee in args:
+        if len(constructee) == 1:
+            links.append(Client(constructee[0]))
+        elif len(constructee) == 2:
+            links.append(Client(constructee[0], **constructee[1]))
+    return links
 
 class Server(servers.HTTPServer):
     "A JSONRPC server"
