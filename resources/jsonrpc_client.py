@@ -13,7 +13,7 @@ print client.sayhi("David")
 with Client("http://localhost:7890") as c:
     print c.sayhi("Larry")
 
-one, two = chain(("http://localhost:7890").chain("http://localhost:7890", timeout=5, verb="GET"))
+one, two = chain("http://localhost:7890").chain("http://localhost:7890", timeout=5, verb="GET")
 
 print one.sayhi("ONE"), "CHAIN 1"
 print two.sayhi("TWO"), "CHAIN 2"

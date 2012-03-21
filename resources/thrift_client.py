@@ -7,5 +7,5 @@ from rpc import thrifty
 
 from service import Service
 
-c = thrifty.Client(Service, "localhost", port = 4567)#
-print c
+with thrifty.Client("localhost:4567", Service) as c:
+    print c.ping()
