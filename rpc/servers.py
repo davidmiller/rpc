@@ -27,10 +27,11 @@ class Server(object):
         Arguments:
         - `host`: string
         - `port`: int
+        - `handler`: callable
         """
         self.host = host
         self.port = port
-        self.handler = handler
+        self.handler = handler()
 
     def __repr__(self):
         return "<{flavour} Server on {host}:{port} calling {handler}> ".format(
