@@ -52,6 +52,7 @@ API Docs
 .. toctree::
    :maxdepth: 1
 
+   modules/chain
    modules/clients
    modules/exceptions
    modules/jsonp
