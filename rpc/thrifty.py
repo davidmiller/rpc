@@ -61,6 +61,10 @@ class Client(clients.RpcProxy):
         self._transport.close()
         return
 
+
+class Server(object):
+    pass
+
 # @contextlib.contextmanager
 # def Client(service, host, port, framed=False):
 #     """

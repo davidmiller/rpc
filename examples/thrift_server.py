@@ -13,5 +13,5 @@ class Handler(object):
 
 
 if __name__ == '__main__':
-    server = thrifty.Server(port=4567, handler=Handler)
-
+    server = thrifty.Server(port=4567, handler=Handler, service=Service)
+    server.serve()
