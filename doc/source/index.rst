@@ -14,7 +14,7 @@ Because you too can have nice things::
 
     import Service
 
-    with thrifty.client("localhost", 45678, Service) as c:
+    with thrifty.client("localhost:45678", Service) as c:
         print c.ping()
 
 `See the same code`_ the way the Thrift documentation would have you do it.

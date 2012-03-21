@@ -29,19 +29,19 @@ All the rpc clients also work as contextmanagers. For protocols where you have t
 
     from rpc.jsonrpc import Client
 
-    with Client("localhost",6789") as client:
+    with Client("localhost:6789") as client:
         print client.ping()
 
 Protocol Classes
 ----------------
 
-Some protocols need a Python class to function, that's fine. With Rpc it's the third argument::
+Some protocols need a Python class to function, that's fine. With Rpc it's the second argument::
 
     from rpc import thrifty
 
     import Service
 
-    with thrifty.client("localhost", 45678, Service) as c:
+    with thrifty.client("localhost:45678", Service) as c:
         print c.ping()
 
 Opening and closing connections
@@ -53,8 +53,10 @@ For protocols that require an explicit open/close of some connection, the client
 
     import Service
 
-    c.client("localhost", 45678, Service)
-        print c.ping()
+    c = thrifty.client("localhost:45678", Service)
+    c.open()
+    print c.ping()
+    c.close()
 
 Chaining
 --------
