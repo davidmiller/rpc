@@ -2,13 +2,21 @@
 rpc.jsonrpc
 
 Provide JSONRPC implementations
+===============================
+
+Special parameters for JSON RPC
+-------------------------------
+
+In addition to the normal parameters for Clients/Servers, the JSON RPC versions
+contain a `verb` argument that allows you to specify either POST or GET as the
+HTTP verb.
 """
 import json
 import uuid
 
 import requests
 
-from rpc import exceptions, clients, servers
+from rpc import exceptions, clients, servers, chains
 
 class Client(clients.RpcProxy):
     """
@@ -79,24 +87,15 @@ class Client(clients.RpcProxy):
             raise exceptions.RemoteException(result['result'])
 
 
-def chain(*args):
+def chain(*args, **kwargs ):
     """
-    Expects tuples of (URL, [{[timeout], [verb]}])
+    Will return an iterable which can be .chain()'ed as much as you
+    like to create multiple Clients.
 
-    in order to return multiple clients.
-
-    Will return an iterable of clients.
-
-    Arguments:
-    - `*args`: tuples suitable for initialising RPC Clients
+    >>> chain("localhost").chain("example.com")
+    ... [<JSON RPC Client for localhost>, <JSON RPC Client for example.com>]
     """
-    links = []
-    for constructee in args:
-        if len(constructee) == 1:
-            links.append(Client(constructee[0]))
-        elif len(constructee) == 2:
-            links.append(Client(constructee[0], **constructee[1]))
-    return links
+    return chains.client_chain(Client, *args, **kwargs)
 
 class Server(servers.HTTPServer):
     "A JSONRPC server"
