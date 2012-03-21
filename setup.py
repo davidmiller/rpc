@@ -4,7 +4,7 @@ from distutils.core import setup
 
 VERSION_FILE = "rpc/_version.py"
 verstrline = open(VERSION_FILE, "rt").read()
-VSRE = r'^__version__= [\'"]([^\'"]*)[\'"]'
+VSRE = r'^__version__ = [\'"]([^\'"]*)[\'"]'
 mo = re.search(VSRE,  verstrline, re.M)
 if mo:
     VERSION = mo.group(1)
