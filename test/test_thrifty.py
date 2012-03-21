@@ -7,6 +7,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../r
 
 import unittest
 
+from mock import patch
+
 from thrift.transport import TTransport
 
 from service import Service
@@ -32,7 +34,7 @@ class ClientTestCase(unittest.TestCase):
 
     def test_init(self):
         """ Chain JSON RPC Clients"""
-        client = thrifty.Client("localhost", 30303, Service, timeout=0.5)
+        client = thrifty.Client("localhost:30303", Service, timeout=0.5)
         self.assertEqual(Service, client._service)
         self.assertEqual("localhost", client.url)
         self.assertEqual(0.5, client.timeout)
@@ -42,8 +44,16 @@ class ClientTestCase(unittest.TestCase):
 
     def test_repr(self):
         """ String Repr """
-        client = thrifty.Client("localhost", 30303, Service, timeout=0.5)
+        client = thrifty.Client("localhost:30303", Service, timeout=0.5)
         self.assertEqual("<Thrift Client for localhost:30303>", str(client))
+
+    def test_contextmanager(self):
+        """ Use as a contextmanager """
+        with patch.object(thrifty, 'TTransport') as Ptrans:
+            with thrifty.Client("localhost:30303", Service) as c:
+                self.assertIsInstance(c, Service.Client)
+                Ptrans.TBufferedTransport.return_value.open.assert_called_once_with()
+            Ptrans.TBufferedTransport.return_value.close.assert_called_once_with()
 
 
     def tearDown(self):
