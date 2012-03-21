@@ -98,7 +98,17 @@ def chain(*args, **kwargs ):
     return chains.client_chain(Client, *args, **kwargs)
 
 class Server(servers.HTTPServer):
-    "A JSONRPC server"
+    """
+    A JSONRPC server
+
+    >>> class Handler(object):
+    ...     def sayhi(self, person):
+    ...         return "Hi {0}".format(person)
+    ...
+    >>> server = Server("localhost", 7890, Handler)
+    >>> server.serve()
+
+    """
     flavour = "JSON RPC"
 
     def procedure(self, request):
