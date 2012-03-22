@@ -7,7 +7,7 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
-from rpc import clients
+from rpc import clients, servers
 
 class ConnectionError(Exception):
     "Failed to connect to an interface with the passed params"
@@ -62,8 +62,24 @@ class Client(clients.RpcProxy):
         return
 
 
-class Server(object):
-    pass
+class Server(servers.Server):
+    """
+    The Thrift server instance.
+
+    This class wraps the creation of our Thrift server in the
+    Rpc API.
+    """
+    flavour = "Thrift"
+
+    def __init__(self, service, **kwargs):
+        """
+
+        Arguments:
+        - `service`:
+        - `**kwargs`:
+        """
+        super(Server, self).__init__(**kwargs)
+        pass
 
 # @contextlib.contextmanager
 # def Client(service, host, port, framed=False):

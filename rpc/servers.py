@@ -34,18 +34,17 @@ class Server(object):
         self.handler = handler()
 
     def __repr__(self):
-        return "<{flavour} Server on {host}:{port} calling {handler}> ".format(
-            flavour=self.flavour, host=self.host, port=self.port, handler=self.handler)
+        return "<{flavour} Server on {host}:{port} calling {handler}>".format(
+            flavour=self.flavour, host=self.host, port=self.port,
+            handler=self.handler.__class__.__name__)
 
     def serve(self):
         """
-        Start handling requests.
-
-        It a Sub-Optimal idea to use this in any kind of production setting.
+        Subclasses should override this base method to accept incoming
+        calls and deal with marshalling/dispatch.
         """
-        print("Serving {flavour} on {host}:{port}".format(
-                flavour=self.flavour, host=self.host, port=self.port))
-        self.httpd.serve_forever()
+        raise NotImplementedError()
+
 
 class HTTPServer(Server):
     "WSGI HTTP Server"
@@ -73,6 +72,16 @@ class HTTPServer(Server):
         status, headers, response = self.procedure(request)
         start_response(status, headers)
         return [self.parse_response(request, response)]
+
+    def serve(self):
+        """
+        Start handling requests.
+
+        It a Sub-Optimal idea to use this in any kind of production setting.
+        """
+        print("Serving {flavour} on {host}:{port}".format(
+                flavour=self.flavour, host=self.host, port=self.port))
+        self.httpd.serve_forever()
 
 
 

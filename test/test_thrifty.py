@@ -3,7 +3,7 @@ Unittests for the rpc.thrifty module
 """
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../resources/gen-py')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../examples/gen-py')))
 
 import unittest
 
@@ -58,6 +58,20 @@ class ClientTestCase(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+class ServerTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def test_repr(self):
+        """ """
+        server = thrifty.Server(host="localhost", port=4444, handler=dict, service=Service)
+        exp = "<Thrift Server on localhost:4444 calling dict>"
+        self.assertEqual(exp, str(server))
+
+    def tearDown(self):
+        pass
+
 
 
 
