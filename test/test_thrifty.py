@@ -7,8 +7,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../e
 
 import unittest
 
-from mock import patch
+from mock import patch, Mock
 
+from thrift.server import TProcessPoolServer
 from thrift.transport import TTransport
 
 from service import Service
@@ -68,6 +69,20 @@ class ServerTestCase(unittest.TestCase):
         server = thrifty.Server(host="localhost", port=4444, handler=dict, service=Service)
         exp = "<Thrift Server on localhost:4444 calling dict>"
         self.assertEqual(exp, str(server))
+
+    def test_scaffold(self):
+        """ Scaffold the server """
+        server = thrifty.Server(host="localhost", port=4444, handler=dict, service=Service)
+        self.assertIsInstance(server.handler, dict)
+        self.assertIsInstance(server._server, TProcessPoolServer.TProcessPoolServer)
+
+    def test_serve(self):
+        "Serve should delegate"
+        server = thrifty.Server(host="localhost", port=4444, handler=dict, service=Service)
+        mock_serv = Mock(name='mock Tserver')
+        server._server = mock_serv
+        server.serve()
+        mock_serv.serve.assert_called_once_with()
 
     def tearDown(self):
         pass

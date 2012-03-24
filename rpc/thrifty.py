@@ -3,9 +3,10 @@ rpc.thrifty
 """
 # import contextlib
 
+from thrift.protocol import TBinaryProtocol
+from thrift.server import TProcessPoolServer
 from thrift.transport import TSocket
 from thrift.transport import TTransport
-from thrift.protocol import TBinaryProtocol
 
 from rpc import clients, servers
 
@@ -78,8 +79,33 @@ class Server(servers.Server):
         - `service`:
         - `**kwargs`:
         """
+        self.service = service
         super(Server, self).__init__(**kwargs)
         pass
+
+    def scaffold(self):
+        """
+        This function is called at the end of the base class' init.
+        """
+        processor = self.service.Processor(self.handler)
+        sockargs = {}
+        if self.host:
+            sockargs['port'] = self.host
+        if self.port:
+            sockargs['port'] = self.port
+        transport = TSocket.TServerSocket(**sockargs)
+        tfactory = TTransport.TBufferedTransportFactory()
+        pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+        self._server = TProcessPoolServer.TProcessPoolServer(processor, transport, tfactory, pfactory)
+        return
+
+    def serve(self):
+        """
+        Start processing incoming requests to this server
+        """
+        self._server.serve()
+
+
 
 # @contextlib.contextmanager
 # def Client(service, host, port, framed=False):
