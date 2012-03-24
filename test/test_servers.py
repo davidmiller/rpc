@@ -16,6 +16,13 @@ class ServerTestCase(unittest.TestCase):
         self.assertEqual(6786, server.port)
         self.assertIsInstance(server.handler, dict)
 
+    def test_scaffold(self):
+        """
+        Should be a no-op
+        """
+        server = servers.Server(host="localhost", port=6786, handler=dict)
+        self.assertEqual(None, server.scaffold())
+
     def test_serve_raises(self):
         """ Dummy serve() should raise """
         server = servers.Server(host="localhost", port=6786, handler=dict)

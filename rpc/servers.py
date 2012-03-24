@@ -32,11 +32,22 @@ class Server(object):
         self.host = host
         self.port = port
         self.handler = handler()
+        self.scaffold()
 
     def __repr__(self):
         return "<{flavour} Server on {host}:{port} calling {handler}>".format(
             flavour=self.flavour, host=self.host, port=self.port,
             handler=self.handler.__class__.__name__)
+
+    def scaffold(self):
+        """
+        This hook function is called with no arguments as the last item
+        of initialisation. This is an excellent subclass choice for instance
+        building code.
+
+        In this base class, is simply a no-op
+        """
+        return
 
     def serve(self):
         """
