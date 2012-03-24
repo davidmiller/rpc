@@ -103,6 +103,8 @@ class Server(servers.Server):
         """
         Start processing incoming requests to this server
         """
+        print("Serving {flavour} on {host}:{port}".format(
+                flavour=self.flavour, host=self.host, port=self.port))
         self._server.serve()
 
 
