@@ -1,7 +1,7 @@
 """
 rpc.thrifty
+
 """
-# import contextlib
 
 from thrift.protocol import TBinaryProtocol
 from thrift.server import TProcessPoolServer
@@ -30,6 +30,8 @@ class Client(clients.RpcProxy):
     """
     We wrap the Thrift service client in an additional layer
     to remove the need to worry about transports & protocols etc.
+
+    >>> client = thrifty.Client("localhost", 8888)
     """
     flavour = "Thrift"
 

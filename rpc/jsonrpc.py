@@ -1,11 +1,4 @@
 """
-rpc.jsonrpc
-
-Provide JSONRPC implementations
-===============================
-
-Special parameters for JSON RPC
--------------------------------
 
 In addition to the normal parameters for Clients/Servers, the JSON RPC versions
 contain a `verb` argument that allows you to specify either POST or GET as the
@@ -18,9 +11,24 @@ import requests
 
 from rpc import exceptions, clients, servers, chains
 
+"""
+Client Implementation
+---------------------
+"""
+
 class Client(clients.RpcProxy):
     """
-    This Proxy class implements a JSONRPC API
+    This Proxy class implements a JSONRPC API.
+
+    The timeout parameter will specify the ammount of time to wait for a call before
+    raising an error.
+
+    `verb` can be one of wither POST or GET, passed as a string and will determine
+    which HTTP verb the client will use.
+
+    >>> with Client("http://localhost:7890") as c:
+    ...     print c.sayhi("Larry")
+    "Hi Larry"
     """
     flavour = "JSON RPC"
 
@@ -96,6 +104,11 @@ def chain(*args, **kwargs ):
     ... [<JSON RPC Client for localhost>, <JSON RPC Client for example.com>]
     """
     return chains.client_chain(Client, *args, **kwargs)
+
+"""
+Server Implementation
+---------------------
+"""
 
 class Server(servers.HTTPServer):
     """
