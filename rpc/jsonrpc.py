@@ -63,6 +63,20 @@ class Client(clients.RpcProxy):
         return requests.post(self.url, data=payload, headers=headers,
                             timeout=self.timeout)
 
+    def _build_payload(self, *args, **kwargs):
+        """
+        Build the Payload for our call.
+
+        Largely factored out as a convenient Hook fucntions
+        """
+        reqid = uuid.uuid4().hex
+        method = args[1]
+        params = args[2:]
+        if kwargs:
+            raise ValueError("Keyword arguments not supported by JSON RPC try passing a dict.")
+        payload = dict(params=params, id=reqid, method=method)
+        return reqid, {k: json.dumps(v) for k, v in payload.items()}
+
     def _apicall(self, *args, **kwargs):
         """
         Make a JSONRPC call to a JSONRPC server
@@ -70,13 +84,7 @@ class Client(clients.RpcProxy):
         Arguments:
         - `data`: string
         """
-        method = args[1]
-        params = args[2:]
-        reqid = uuid.uuid4().hex
-        if kwargs:
-            raise ValueError("Keyword arguments not supported by JSON RPC try passing a dict.")
-        payload = dict(params=params, id=reqid, method=method)
-        payload = {k: json.dumps(v) for k, v in payload.items()}
+        reqid, payload = self._build_payload(*args, **kwargs)
         headers = {'X-flavour': 'JSONRPC'}
         if self.verb == "GET":
             resp = self._get(headers, payload)
