@@ -241,3 +241,11 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+# Sincere-Sphinx-specific settings
+html_context = dict(
+    language = "Python",
+    source = "https://github.com/davidmiller/rpc",
+    bugs = "https://github.com/davidmiller/rpc/issues",
+    license = "LGPL"
+    )
