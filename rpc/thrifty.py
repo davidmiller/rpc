@@ -14,9 +14,10 @@ class ConnectionError(Exception):
     "Failed to connect to an interface with the passed params"
 
 
-def _clientmaker(service, host, port, framed=False):
+def _clientmaker(service, host, port, framed=False, timeout=1):
     "Return client instance and transport for `service'"
     transport = TSocket.TSocket(host, port)
+    transport.setTimeout(timeout*1000) # Milliseconds conversion
     if framed:
         transport = TTransport.TFramedTransport(transport)
     else:
@@ -44,7 +45,8 @@ class Client(clients.RpcProxy):
         self.url, port = url.split(':')
         self.port = int(port)
         self.timeout = timeout
-        self._client, self._transport = _clientmaker(service, self.url, self.port)
+        self._client, self._transport = _clientmaker(service, self.url, self.port,
+                                                     timeout=timeout)
 
     def __repr__(self):
         return "<{flavour} Client for {url}:{port}>".format(

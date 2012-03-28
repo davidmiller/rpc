@@ -10,7 +10,7 @@ import unittest
 from mock import patch, Mock
 
 from thrift.server import TProcessPoolServer
-from thrift.transport import TTransport
+from thrift.transport import TSocket, TTransport
 
 from service import Service
 from rpc import thrifty
@@ -24,6 +24,14 @@ class ClientMakerTestCase(unittest.TestCase):
         c, t = thrifty._clientmaker(Service, "localhost", 567)
         self.assertIsInstance(c, Service.Client)
         self.assertIsInstance(t, TTransport.TBufferedTransport)
+
+    def test_timeout(self):
+        """ Test that the Timeout is set """
+        with patch.object(TSocket.TSocket, "setTimeout") as Pset:
+            c, t = thrifty._clientmaker(Service, "localhost", 666)
+            Pset.assert_called_with(1000)
+            c, t = thrifty._clientmaker(Service, "localhost", 666, timeout=5)
+            Pset.assert_called_with(5000)
 
     def tearDown(self):
         pass
@@ -55,7 +63,6 @@ class ClientTestCase(unittest.TestCase):
                 self.assertIsInstance(c, Service.Client)
                 Ptrans.TBufferedTransport.return_value.open.assert_called_once_with()
             Ptrans.TBufferedTransport.return_value.close.assert_called_once_with()
-
 
     def tearDown(self):
         pass
