@@ -75,7 +75,7 @@ class Client(clients.RpcProxy):
         if kwargs:
             raise ValueError("Keyword arguments not supported by JSON RPC try passing a dict.")
         payload = dict(params=params, id=reqid, method=method)
-        return reqid, {k: json.dumps(v) for k, v in payload.items()}
+        return reqid, dict([(k, json.dumps(v)) for k, v in payload.items()])
 
     def _apicall(self, *args, **kwargs):
         """

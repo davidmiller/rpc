@@ -35,6 +35,7 @@ setup(
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 2.6",
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: OS Independent",
         "Development Status :: 2 - Pre-Alpha",

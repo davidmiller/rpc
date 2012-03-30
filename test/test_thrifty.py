@@ -6,6 +6,8 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../examples/gen-py')))
 
 import unittest
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
 
 from mock import patch, Mock
 
