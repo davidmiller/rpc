@@ -8,11 +8,7 @@ from thrift.server import TProcessPoolServer
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 
-from rpc import clients, servers
-
-class ConnectionError(Exception):
-    "Failed to connect to an interface with the passed params"
-
+from rpc import clients, exceptions, servers
 
 def _clientmaker(service, host, port, framed=False, timeout=1):
     "Return client instance and transport for `service'"
@@ -56,7 +52,10 @@ class Client(clients.RpcProxy):
         """
         Open the transport and return the client for Thrift contextmanagers
         """
-        self._transport.open()
+        try:
+            self._transport.open()
+        except TTransport.TTransportException:
+            raise exceptions.ConnectionError
         return self._client
 
     def __exit__(self, exc, type, stack):

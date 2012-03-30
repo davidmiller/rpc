@@ -8,3 +8,6 @@ class IdError(Exception):
 
 class RemoteException(Exception):
     "The remote system raised an exception of some sort"
+
+class ConnectionError(Exception):
+    "Failed to connect to an interface with the passed params"
