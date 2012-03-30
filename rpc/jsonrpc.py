@@ -67,13 +67,16 @@ class Client(clients.RpcProxy):
         """
         Build the Payload for our call.
 
+        The first argument should be the method, the rest the arguments to the
+        remote service call.
+
         Largely factored out as a convenient Hook fucntions
         """
+        if kwargs:
+            raise ValueError("Keyword arguments not supported by JSON RPC try passing a dict.")
         reqid = uuid.uuid4().hex
         method = args[1]
         params = args[2:]
-        if kwargs:
-            raise ValueError("Keyword arguments not supported by JSON RPC try passing a dict.")
         payload = dict(params=params, id=reqid, method=method)
         return reqid, dict([(k, json.dumps(v)) for k, v in payload.items()])
 
