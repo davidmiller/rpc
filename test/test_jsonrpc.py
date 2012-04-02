@@ -6,9 +6,9 @@ import unittest
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 
-from mock import patch
+from mock import patch, Mock
 
-from rpc import jsonrpc
+from rpc import exceptions, jsonrpc
 
 class ClientTestCase(unittest.TestCase):
     def setUp(self):
@@ -64,6 +64,21 @@ class ClientTestCase(unittest.TestCase):
                 self.assertEqual("HAI", reqid)
                 self.assertEqual(resp, payload)
 
+    def test_parse_response(self):
+        """ Valid apicall """
+        resp = Mock(name="Mock Response")
+        resp.text = '{"id":"FOO", "result":"pong", "error":null}'
+        resp.status_code = 200
+        result = self.c._parse_resp("FOO", resp)
+        self.assertEqual(dict(result="pong", error=None), result)
+
+    def test_wrong_id(self):
+        """ Raise due to wrong ID """
+        resp = Mock(name="Mock Response")
+        resp.text = '{"id":"FOO", "result":"pong", "error":null}'
+        resp.status_code = 200
+        with self.assertRaises(exceptions.IdError):
+            self.c._parse_resp("FOO2", resp)
 
     def tearDown(self):
         pass

@@ -95,6 +95,16 @@ class Client(clients.RpcProxy):
             resp = self._post(headers, payload)
         else:
             raise ValueError("Unsupported HTTP Verb {verb}".format(verb=self.verb))
+        return self._parse_resp(reqid, resp)
+
+    def _parse_resp(self, reqid, resp):
+        """
+        Given a response from the server, let's parse it and check for errors.
+
+        Arguments:
+        - `reqid`: str
+        - `resp`: requests.Response
+        """
         result = json.loads(resp.text)
         if reqid != result['id']:
             raise exceptions.IdError("API Endpoint returned with id:{ret}, expecting:{exp}".format(
