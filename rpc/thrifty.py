@@ -1,21 +1,19 @@
 """
 rpc.thrifty
-"""
-# import contextlib
 
+"""
+
+from thrift.protocol import TBinaryProtocol
+from thrift.server import TProcessPoolServer
 from thrift.transport import TSocket
 from thrift.transport import TTransport
-from thrift.protocol import TBinaryProtocol
 
-from rpc import clients
+from rpc import clients, exceptions, servers
 
-class ConnectionError(Exception):
-    "Failed to connect to an interface with the passed params"
-
-
-def _clientmaker(service, host, port, framed=False):
+def _clientmaker(service, host, port, framed=False, timeout=1):
     "Return client instance and transport for `service'"
     transport = TSocket.TSocket(host, port)
+    transport.setTimeout(timeout*1000) # Milliseconds conversion
     if framed:
         transport = TTransport.TFramedTransport(transport)
     else:
@@ -29,10 +27,12 @@ class Client(clients.RpcProxy):
     """
     We wrap the Thrift service client in an additional layer
     to remove the need to worry about transports & protocols etc.
+
+    >>> client = thrifty.Client("localhost", 8888)
     """
     flavour = "Thrift"
 
-    def __init__(self, url, service, timeout=1):
+    def __init__(self, url, service, timeout=1, framed=False):
         """
         We Allow either a URI we can parse a port number from,
         or a specific port keyword argument.
@@ -41,7 +41,8 @@ class Client(clients.RpcProxy):
         self.url, port = url.split(':')
         self.port = int(port)
         self.timeout = timeout
-        self._client, self._transport = _clientmaker(service, self.url, self.port)
+        self._client, self._transport = _clientmaker(service, self.url, self.port,
+                                                     timeout=timeout, framed=framed)
 
     def __repr__(self):
         return "<{flavour} Client for {url}:{port}>".format(
@@ -51,7 +52,10 @@ class Client(clients.RpcProxy):
         """
         Open the transport and return the client for Thrift contextmanagers
         """
-        self._transport.open()
+        try:
+            self._transport.open()
+        except TTransport.TTransportException:
+            raise exceptions.ConnectionError
         return self._client
 
     def __exit__(self, exc, type, stack):
@@ -62,8 +66,51 @@ class Client(clients.RpcProxy):
         return
 
 
-class Server(object):
-    pass
+class Server(servers.Server):
+    """
+    The Thrift server instance.
+
+    This class wraps the creation of our Thrift server in the
+    Rpc API.
+    """
+    flavour = "Thrift"
+
+    def __init__(self, service, **kwargs):
+        """
+
+        Arguments:
+        - `service`:
+        - `**kwargs`:
+        """
+        self.service = service
+        super(Server, self).__init__(**kwargs)
+        pass
+
+    def scaffold(self):
+        """
+        This function is called at the end of the base class' init.
+        """
+        processor = self.service.Processor(self.handler)
+        sockargs = {}
+        if self.host:
+            sockargs['port'] = self.host
+        if self.port:
+            sockargs['port'] = self.port
+        transport = TSocket.TServerSocket(**sockargs)
+        tfactory = TTransport.TBufferedTransportFactory()
+        pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+        self._server = TProcessPoolServer.TProcessPoolServer(processor, transport, tfactory, pfactory)
+        return
+
+    def serve(self):
+        """
+        Start processing incoming requests to this server
+        """
+        print("Serving {flavour} on {host}:{port}".format(
+                flavour=self.flavour, host=self.host, port=self.port))
+        self._server.serve()
+
+
 
 # @contextlib.contextmanager
 # def Client(service, host, port, framed=False):

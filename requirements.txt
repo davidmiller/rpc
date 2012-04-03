@@ -6,3 +6,7 @@ ipdb==0.6.1
 ipython==0.12
 requests==0.10.6
 wsgiref==0.1.2
+mock
+unittest2
+thrift
+pytest

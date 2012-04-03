@@ -8,13 +8,19 @@ from fabric import operations
 deadpan = "happenup@deadpansincerity.com"
 
 @task
+def make_docs():
+    """
+    Rebuild the documentation
+    """
+    with lcd("doc/"):
+        local("make html")
+
+@task
 @hosts(deadpan)
 def upload_docs():
     """
     Build, compress, upload and extract the latest docs
     """
-    with lcd("doc/"):
-        local("make html")
     with lcd("doc/build/html"):
         local("rm -rf rpcdocs.tar.gz")
         local("tar zcvf rpcdocs.tar.gz *")

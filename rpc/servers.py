@@ -4,9 +4,12 @@ rpc.servers
 Base class for server implementations
 """
 import functools
+import socket
 from wsgiref import simple_server
 
 import webob
+
+from rpc import exceptions
 
 def webobify(fn):
     "Decorator to convert a WSGI environ into a WebOb Request"
@@ -20,6 +23,19 @@ def webobify(fn):
 class Server(object):
     """
     Base class for servers.
+
+    Servers are initialised as contextmanagers in order to ensure the freeing of
+    resources.
+
+    >>> with Server('localhost', 8888, object) as s:
+    ...     s.serve()
+
+    The `close` method of a server instance is guaranteed to be called during
+    shutdown using this method.
+
+    Otherwise, the User takes full responsibility for the freeing of resouces.
+
+    Don't do this.
     """
 
     def __init__(self, host=None, port=None, handler=None):
@@ -32,27 +48,70 @@ class Server(object):
         self.host = host
         self.port = port
         self.handler = handler()
+        self.scaffold()
 
     def __repr__(self):
-        return "<{flavour} Server on {host}:{port} calling {handler}> ".format(
-            flavour=self.flavour, host=self.host, port=self.port, handler=self.handler)
+        return "<{flavour} Server on {host}:{port} calling {handler}>".format(
+            flavour=self.flavour, host=self.host, port=self.port,
+            handler=self.handler.__class__.__name__)
+
+    def __del__(self):
+        """
+        By default we call self.close()
+        """
+        self.close()
+        return
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc, type, stack):
+        self.close()
+        return
+
+    def scaffold(self):
+        """
+        This hook function is called with no arguments as the last item
+        of initialisation. This is an excellent subclass choice for instance
+        building code.
+
+        In this base class, is simply a no-op
+        """
+        return
+
+    def close(self):
+        """
+        This hook function is called with no items as the last item
+        of object deletion.
+
+        This is an excellent choice of method to subclass for those
+        servers wishing to free resources.
+        """
+        return
 
     def serve(self):
         """
-        Start handling requests.
-
-        It a Sub-Optimal idea to use this in any kind of production setting.
+        Subclasses should override this base method to accept incoming
+        calls and deal with marshalling/dispatch.
         """
-        print("Serving {flavour} on {host}:{port}".format(
-                flavour=self.flavour, host=self.host, port=self.port))
-        self.httpd.serve_forever()
+        raise NotImplementedError()
+
 
 class HTTPServer(Server):
-    "WSGI HTTP Server"
+    """
+    A WSGI based HTTP Server class.
 
-    def __init__(self, *args, **kwargs):
-        super(HTTPServer, self).__init__(*args, **kwargs)
-        self.httpd = simple_server.make_server(self.host, self.port, self.app)
+    Subclasses of HTTPServer should define two methods, `procedure` and `parse_response`.
+    """
+    flavour = "HTTP Server"
+
+    def close(self):
+        """
+        Close our active port binding
+        """
+        if hasattr(self, 'httpd'):
+            print 'closes!'
+            self.httpd.socket.close()
 
     def parse_response(self, request, response):
         """
@@ -74,43 +133,20 @@ class HTTPServer(Server):
         start_response(status, headers)
         return [self.parse_response(request, response)]
 
+    def serve(self):
+        """
+        Start handling requests.
 
+        It a Sub-Optimal idea to use this in any kind of production setting.
+        """
+        try:
+            self.httpd = simple_server.make_server(self.host, self.port, self.app)
+        except socket.error as err:
+            if err.errno == 98:
+                raise exceptions.PortInUseError("Port {0} is already in use on {1}".format(
+                    self.port, self.host))
 
-    #
-    # Python Kwargs-y version
-    #
-    # @webobify
-    # def app(self, request, start_response):
-    #     """
-    #     Our JSON RPC WSGI App.
+        print("Serving {flavour} on {host}:{port}".format(
+                flavour=self.flavour, host=self.host, port=self.port))
+        self.httpd.serve_forever()
 
-    #     Decode and deserialize the POST data, locate the handler method,
-    #     ascertain the result and then return our JSON response.
-    #     """
-    #     if request.method == 'GET':
-    #         params = request.GET
-    #     elif request.method == 'POST':
-    #         params = request.POST
-    #     else:
-    #         status = '500 Error'
-    #         return ["Invalid HTTP Verb {verb}".format(verb=request.method)]
-    #     method, args, kwargs = [json.loads(v) for v in [params['method'],
-    #                                                     params.get('args', '[]'),
-    #                                                     params.get('kwargs', '{}')]]
-    #     status = '200 OK'
-    #     response_headers = [('Content-Type', 'application/json')]
-    #     if not hasattr(self.handler, method):
-    #         status = '500 Error'
-    #         result = 'Method Not Found... '
-    #     else:
-    #         try:
-    #             result = getattr(self.handler, method)(*args, **kwargs)
-    #         except Exception as err:
-    #             status = '500 Error'
-    #             result = '{error}: {msg}'.format(
-    #                 error=err.__class__.__name__, msg=err.message)
-    #     start_response(status, response_headers)
-    #     response = dict(result=result)
-    #     if 'id' in params:
-    #         response['id'] = json.loads(params['id'])
-    #     return [self.parse_response(request, response)]

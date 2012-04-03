@@ -11,18 +11,31 @@ if mo:
 else:
     raise RuntimeError("Unable to find version string in {0}".format(VERSION_FILE))
 
+LONG_DESC = """
+Rpc gives you a consistent API for RPC protocols that doesn't suck!
+
+Because you too can have nice things::
+
+    from rpc import thrifty
+
+    import Service
+
+    with thrifty.client("localhost:45678", Service) as c:
+        print c.ping()
+"""
 
 setup(
     name = "rpc",
     version = VERSION,
     author = "David Miller",
     author_email = "david@deadpansincerity.com",
-    url = "https://github.com/davidmiller/rpc",
-    description = "RPCs",
-    long_description = "Nice things for RPC",
+    url = "http://www.deadpansincerity.com/docs/rpc",
+    description = "RPC Client/Server library",
+    long_description = LONG_DESC,
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 2.6",
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: OS Independent",
         "Development Status :: 2 - Pre-Alpha",

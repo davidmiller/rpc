@@ -3,13 +3,16 @@ Unittests for the rpc.thrifty module
 """
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../resources/gen-py')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../examples/gen-py')))
 
 import unittest
+if sys.version_info < (2, 7):
+    import unittest2 as unittest
 
-from mock import patch
+from mock import patch, Mock
 
-from thrift.transport import TTransport
+from thrift.server import TProcessPoolServer
+from thrift.transport import TSocket, TTransport
 
 from service import Service
 from rpc import thrifty
@@ -23,6 +26,14 @@ class ClientMakerTestCase(unittest.TestCase):
         c, t = thrifty._clientmaker(Service, "localhost", 567)
         self.assertIsInstance(c, Service.Client)
         self.assertIsInstance(t, TTransport.TBufferedTransport)
+
+    def test_timeout(self):
+        """ Test that the Timeout is set """
+        with patch.object(TSocket.TSocket, "setTimeout") as Pset:
+            c, t = thrifty._clientmaker(Service, "localhost", 666)
+            Pset.assert_called_with(1000)
+            c, t = thrifty._clientmaker(Service, "localhost", 666, timeout=5)
+            Pset.assert_called_with(5000)
 
     def tearDown(self):
         pass
@@ -55,9 +66,36 @@ class ClientTestCase(unittest.TestCase):
                 Ptrans.TBufferedTransport.return_value.open.assert_called_once_with()
             Ptrans.TBufferedTransport.return_value.close.assert_called_once_with()
 
+    def tearDown(self):
+        pass
+
+class ServerTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def test_repr(self):
+        """ """
+        server = thrifty.Server(host="localhost", port=4444, handler=dict, service=Service)
+        exp = "<Thrift Server on localhost:4444 calling dict>"
+        self.assertEqual(exp, str(server))
+
+    def test_scaffold(self):
+        """ Scaffold the server """
+        server = thrifty.Server(host="localhost", port=4444, handler=dict, service=Service)
+        self.assertIsInstance(server.handler, dict)
+        self.assertIsInstance(server._server, TProcessPoolServer.TProcessPoolServer)
+
+    def test_serve(self):
+        "Serve should delegate"
+        server = thrifty.Server(host="localhost", port=4444, handler=dict, service=Service)
+        mock_serv = Mock(name='mock Tserver')
+        server._server = mock_serv
+        server.serve()
+        mock_serv.serve.assert_called_once_with()
 
     def tearDown(self):
         pass
+
 
 
 
