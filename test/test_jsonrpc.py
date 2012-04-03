@@ -84,7 +84,6 @@ class ClientTestCase(unittest.TestCase):
         pass
 
 
-
 class ChainTestCase(unittest.TestCase):
     def setUp(self):
         pass
@@ -97,6 +96,43 @@ class ChainTestCase(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+
+class ServerTestCase(unittest.TestCase):
+    def setUp(self):
+        class Handler(object):
+            def ping(self):
+                return "pong!"
+
+            def sayhi(self, person):
+                return "Hi " + person
+
+        self.s = jsonrpc.Server('localhost', 55543, Handler)
+
+        self.mock_post = post = Mock(name="Mock POST")
+        post.method = "POST"
+
+
+    def test_procedure(self):
+        """ Simple passing case """
+        self.mock_post.POST = dict(method='"ping"',
+                                   params = '[]',
+                                   id='"FAKEID"')
+        status, headers, content = self.s.procedure(self.mock_post)
+        self.assertEqual('200 OK', status)
+        self.assertEqual([('Content-Type', 'application/json')], headers)
+        expected = dict(id='FAKEID', result='pong!', error=None)
+        self.assertEqual(expected, content)
+
+    def test_parse_response(self):
+        """ Jsonify our response """
+        data = dict(id='FAKEID', result='pong!', error=None)
+        # This is quite fragile- it relies on dict ordering
+        expected = '{"error": null, "id": "FAKEID", "result": "pong!"}'
+        self.assertEqual(expected, self.s.parse_response(self.mock_post, data))
+
+    def tearDown(self):
+        self.s.close()
 
 
 

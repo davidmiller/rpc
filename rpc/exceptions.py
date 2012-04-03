@@ -11,3 +11,6 @@ class RemoteException(Exception):
 
 class ConnectionError(Exception):
     "Failed to connect to an interface with the passed params"
+
+class PortInUseError(Exception):
+    "User tried to start a server on a port that was in use"

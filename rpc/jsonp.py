@@ -8,7 +8,12 @@ import json
 from rpc import servers
 
 class Server(servers.HTTPServer):
-    "A JSONP Server"
+    """
+    A JSONP Server
+
+    >>> with Server('localhost', 8080, object) as server:
+    ...     server.serve()
+    """
     flavour = "JSONP"
 
     def parse_response(self, request, response):

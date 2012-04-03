@@ -139,8 +139,8 @@ class Server(servers.HTTPServer):
     ...     def sayhi(self, person):
     ...         return "Hi {0}".format(person)
     ...
-    >>> server = Server("localhost", 7890, Handler)
-    >>> server.serve()
+    >>> with Server("localhost", 7890, Handler) as server:
+    ...     server.serve()
 
     """
     flavour = "JSON RPC"
@@ -152,6 +152,8 @@ class Server(servers.HTTPServer):
 
         the procedure() method of HTTP Servers should return
         status, headers, content
+
+        The request argument is a Web-Ob'ified WSGI request.
         """
         status = '200 OK'
         headers = [('Content-Type', 'application/json')]

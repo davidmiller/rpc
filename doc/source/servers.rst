@@ -16,8 +16,8 @@ Let's write a JSON RPC Server::
         def sayhi(self, person):
             return "Hi {0}".format(person)
 
-    server = Server("localhost", 7890, Handler())
-    server.serve()
+    with Server("localhost", 7890, Handler()) as server:
+        server.serve()
 
 And your server is now running on localhost port 7890.
 

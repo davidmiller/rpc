@@ -6,7 +6,15 @@ import unittest
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 
-from rpc import servers
+from rpc import exceptions, servers
+
+# Use this as our dummy handler
+class Handler(object):
+    def ping(self):
+        return "pong!"
+
+    def sayhi(self, person):
+        return "Hi " + person
 
 class ServerTestCase(unittest.TestCase):
     def setUp(self):
@@ -31,6 +39,21 @@ class ServerTestCase(unittest.TestCase):
         server = servers.Server(host="localhost", port=6786, handler=dict)
         with self.assertRaises(NotImplementedError):
             server.serve()
+
+    def tearDown(self):
+        pass
+
+
+class HTTPServerTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def test_bind_twice(self):
+        """ Bind and serve our instance"""
+        s1 = servers.HTTPServer("localhost", 8878, Handler)
+        with self.assertRaises(exceptions.PortInUseError):
+            servers.HTTPServer("localhost", 8878, Handler)
+
 
     def tearDown(self):
         pass

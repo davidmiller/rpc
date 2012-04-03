@@ -32,7 +32,7 @@ class Client(clients.RpcProxy):
     """
     flavour = "Thrift"
 
-    def __init__(self, url, service, timeout=1):
+    def __init__(self, url, service, timeout=1, framed=False):
         """
         We Allow either a URI we can parse a port number from,
         or a specific port keyword argument.
@@ -42,7 +42,7 @@ class Client(clients.RpcProxy):
         self.port = int(port)
         self.timeout = timeout
         self._client, self._transport = _clientmaker(service, self.url, self.port,
-                                                     timeout=timeout)
+                                                     timeout=timeout, framed=framed)
 
     def __repr__(self):
         return "<{flavour} Client for {url}:{port}>".format(
