@@ -55,6 +55,20 @@ class Server(object):
             flavour=self.flavour, host=self.host, port=self.port,
             handler=self.handler.__class__.__name__)
 
+    def __del__(self):
+        """
+        By default we call self.close()
+        """
+        self.close()
+        return
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc, type, stack):
+        self.close()
+        return
+
     def scaffold(self):
         """
         This hook function is called with no arguments as the last item
@@ -62,6 +76,16 @@ class Server(object):
         building code.
 
         In this base class, is simply a no-op
+        """
+        return
+
+    def close(self):
+        """
+        This hook function is called with no items as the last item
+        of object deletion.
+
+        This is an excellent choice of method to subclass for those
+        servers wishing to free resources.
         """
         return
 
@@ -79,15 +103,7 @@ class HTTPServer(Server):
 
     Subclasses of HTTPServer should define two methods, `procedure` and `parse_response`.
     """
-
-    def __init__(self, *args, **kwargs):
-        super(HTTPServer, self).__init__(*args, **kwargs)
-        try:
-            self.httpd = simple_server.make_server(self.host, self.port, self.app)
-        except socket.error as err:
-            if err.errno == 98:
-                raise exceptions.PortInUseError("Port {0} is already in use on {1}".format(
-                    self.port, self.host))
+    flavour = "HTTP Server"
 
     def close(self):
         """
@@ -123,6 +139,13 @@ class HTTPServer(Server):
 
         It a Sub-Optimal idea to use this in any kind of production setting.
         """
+        try:
+            self.httpd = simple_server.make_server(self.host, self.port, self.app)
+        except socket.error as err:
+            if err.errno == 98:
+                raise exceptions.PortInUseError("Port {0} is already in use on {1}".format(
+                    self.port, self.host))
+
         print("Serving {flavour} on {host}:{port}".format(
                 flavour=self.flavour, host=self.host, port=self.port))
         self.httpd.serve_forever()

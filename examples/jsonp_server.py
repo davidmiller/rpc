@@ -8,7 +8,7 @@ class Handler(object):
         raise ValueError("Wrong Universe")
 
 def main():
-    with Server("localhost", 7890, Handler()) as server:
+    with Server("localhost", 7890, Handler) as server:
         server.serve()
 
 if __name__ == '__main__':
