@@ -1,11 +1,12 @@
 """
-rpc.xmlrpc
+This module acts as a wrapper around the standard library's xmlrpc module(s)
 
-This module acts as a wrapper around the standard library's xmlrpclib module.
+
 """
+import SimpleXMLRPCServer
 import xmlrpclib
 
-from rpc import clients
+from rpc import clients, servers
 
 class Client(clients.RpcProxy):
     """
@@ -28,6 +29,45 @@ class Client(clients.RpcProxy):
         """
         Call our xmlrpclib proxy
         """
-        raise NotImplementedError()
+        method = args[1]
+        return getattr(self._proxy, method)(*args[2:], **kwargs)
 
+
+class Server(servers.Server):
+    """
+    An XML RPC server
+
+    >>> with Server('localhost', 666, Handler, service=Service) as s:
+    ...     s.serve()
+
+    """
+    flavour = "XML RPC"
+
+    def scaffold(self):
+        """
+        Herein we construct an instance of the base stdlib server.
+
+        As this method is implicitly called by the parent's constructor,
+        there is little need for the user to call it themselves.
+        """
+        self._server = SimpleXMLRPCServer.SimpleXMLRPCServer((self.host, self.port))
+        self._server.register_introspection_functions()
+        self._server.register_instance(self.handler)
+        return
+
+    def close(self):
+        """
+        Frees the socket that this instance is bound to.
+
+        This method is ensured to be called when using the server as a contextmanager,
+        otherwise the user will likely want to ensure it gets closed themslves.
+        """
+        self._server.server_close()
+        return
+
+    def serve(self):
+        """
+        Begin serving XML RPC requests from this instance
+        """
+        self._server.serve_forever()
 

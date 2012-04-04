@@ -103,7 +103,8 @@ class Server(object):
 
     def serve(self):
         """
-        Subclasses should override this base method to accept incoming
+        This hook function is intended for Subclasses to
+        override in order to accept incoming
         calls and deal with marshalling/dispatch.
         """
         raise NotImplementedError()

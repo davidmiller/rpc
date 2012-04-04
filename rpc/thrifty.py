@@ -72,6 +72,10 @@ class Server(servers.Server):
 
     This class wraps the creation of our Thrift server in the
     Rpc API.
+
+    >>> with Server('localhost', 666, Handler, service=Service) as s:
+    ...     s.serve()
+
     """
     flavour = "Thrift"
 

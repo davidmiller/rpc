@@ -31,6 +31,7 @@ Supported Protocols
 * :ref:`rpc.jsonrpc`
 * :ref:`rpc.jsonp`
 * :ref:`rpc.thrifty`
+* :ref:`rpc.xmlrpc`
 
 Clients
 -------
