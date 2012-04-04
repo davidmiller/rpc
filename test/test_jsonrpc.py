@@ -10,6 +10,13 @@ from mock import patch, Mock
 
 from rpc import exceptions, jsonrpc
 
+class Handler(object):
+    def ping(self):
+        return "pong!"
+
+    def sayhi(self, person):
+        return "Hi " + person
+
 class ClientTestCase(unittest.TestCase):
     def setUp(self):
         self.c = jsonrpc.Client("http://example.com")
@@ -64,6 +71,8 @@ class ClientTestCase(unittest.TestCase):
                 self.assertEqual("HAI", reqid)
                 self.assertEqual(resp, payload)
 
+    # !!! apicall
+
     def test_parse_response(self):
         """ Valid apicall """
         resp = Mock(name="Mock Response")
@@ -100,18 +109,16 @@ class ChainTestCase(unittest.TestCase):
 
 class ServerTestCase(unittest.TestCase):
     def setUp(self):
-        class Handler(object):
-            def ping(self):
-                return "pong!"
-
-            def sayhi(self, person):
-                return "Hi " + person
-
         self.s = jsonrpc.Server('localhost', 55543, Handler)
 
         self.mock_post = post = Mock(name="Mock POST")
         post.method = "POST"
 
+    def test_contextmanager(self):
+        """ Can we use as a contextmanager """
+        with jsonrpc.Server('localhost', 666, Handler) as s:
+            self.assertIsInstance(s, jsonrpc.Server)
+            self.assertEqual('localhost', s.host)
 
     def test_procedure(self):
         """ Simple passing case """

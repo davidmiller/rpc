@@ -2,6 +2,7 @@
 rpc.servers
 
 Base class for server implementations
+
 """
 import functools
 import socket
@@ -12,7 +13,10 @@ import webob
 from rpc import exceptions
 
 def webobify(fn):
-    "Decorator to convert a WSGI environ into a WebOb Request"
+    """
+    Decorator to convert a method that expects a
+    WSGI environ into a WebOb Request
+    """
 
     @functools.wraps(fn)
     def munger(self, environ, start):
@@ -37,6 +41,7 @@ class Server(object):
 
     Don't do this.
     """
+    flavour = 'Base'
 
     def __init__(self, host=None, port=None, handler=None):
         """
@@ -89,6 +94,13 @@ class Server(object):
         """
         return
 
+    def procedure(self,*args, **kwargs):
+        """
+        This hook function is called in order to dispatch the incoming call into
+        it's target method.
+        """
+        raise NotImplementedError()
+
     def serve(self):
         """
         Subclasses should override this base method to accept incoming
@@ -122,10 +134,10 @@ class HTTPServer(Server):
     @webobify
     def app(self, request, start_response):
         """
-        Our JSON RPC WSGI App.
+        Our HTTP based WSGI RPC application
 
         Decode and deserialize the POST data, locate the handler method,
-        ascertain the result and then return our JSON response.
+        ascertain the result and then return our response.
         """
         if request.method not in ['GET', 'POST']:
             return ["Invalid HTTP Verb {verb}".format(verb=request.method)]
@@ -149,4 +161,14 @@ class HTTPServer(Server):
         print("Serving {flavour} on {host}:{port}".format(
                 flavour=self.flavour, host=self.host, port=self.port))
         self.httpd.serve_forever()
+
+    def procedure(self, request):
+        """
+        This hook function is called in order to dispatch the incoming call into
+        it's target method.
+
+        It is called with a single argument, which is a WebOb Request onject compriing a WSGI
+        environ.
+        """
+        raise NotImplementedError()
 
