@@ -18,8 +18,6 @@ from service import Service
 from rpc import thrifty
 
 class ClientMakerTestCase(unittest.TestCase):
-    def setUp(self):
-        pass
 
     def test_clientmaker(self):
         """ """
@@ -35,8 +33,10 @@ class ClientMakerTestCase(unittest.TestCase):
             c, t = thrifty._clientmaker(Service, "localhost", 666, timeout=5)
             Pset.assert_called_with(5000)
 
-    def tearDown(self):
-        pass
+    def test_framed(self):
+        """ Should be a different Transport class """
+        c, t = thrifty._clientmaker(Service, 'localhost', 666, framed=True)
+        self.assertIsInstance(t, TTransport.TFramedTransport)
 
 
 class ClientTestCase(unittest.TestCase):
@@ -70,8 +70,6 @@ class ClientTestCase(unittest.TestCase):
         pass
 
 class ServerTestCase(unittest.TestCase):
-    def setUp(self):
-        pass
 
     def test_repr(self):
         """ """
@@ -92,11 +90,6 @@ class ServerTestCase(unittest.TestCase):
         server._server = mock_serv
         server.serve()
         mock_serv.serve.assert_called_once_with()
-
-    def tearDown(self):
-        pass
-
-
 
 
 if __name__ == '__main__':

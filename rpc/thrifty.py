@@ -109,23 +109,3 @@ class Server(servers.Server):
         print("Serving {flavour} on {host}:{port}".format(
                 flavour=self.flavour, host=self.host, port=self.port))
         self._server.serve()
-
-
-
-# @contextlib.contextmanager
-# def Client(service, host, port, framed=False):
-#     """
-#     Given a Thrift service, provide a client for it.
-#     """
-#     client, transport = _clientmaker(service, host, port, framed=framed)
-#     try:
-#         transport.open()
-#         yield client
-#     except TTransport.TTransportException:
-#         raise ConnectionError(
-#             "Could not connect to {interface} on {host}:{port}".format(
-#                 host=host, port=port, interface=service.__name__
-#                 )
-#             )
-#     finally:
-#         transport.close()
