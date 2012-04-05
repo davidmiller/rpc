@@ -25,7 +25,14 @@ def _protocolise(url):
 
 class Client(clients.RpcProxy):
     """
-    Fairly thin wrapper for API constancy
+    The xmlrpc.Client class wraps the Standard Library's xmlrpclib
+    client, mostly for API consistency with other Rpc clients.
+
+    >>> with Client('localhost/xmlrpc') as c:
+    ...     c.ping()
+
+    The `timeout` keyword argument specifies the per-call timeout in
+    seconds.
     """
     flavour = "XML RPC"
 
