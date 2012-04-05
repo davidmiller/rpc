@@ -3,10 +3,25 @@ This module acts as a wrapper around the standard library's xmlrpc module(s)
 
 
 """
+import re
 import SimpleXMLRPCServer
+import urlparse
 import xmlrpclib
 
-from rpc import clients, servers
+from rpc import chains, clients, servers
+
+def _protocolise(url):
+    """
+    Given a URL, check to see if there is an assocaited protocol.
+
+    If not, set the protocol to HTTP and return the protocolised URL
+    """
+    # Use the regex to match http//localhost/something
+    protore = re.compile(r'https?:{0,1}/{1,2}')
+    parsed = urlparse.urlparse(url)
+    if not parsed.scheme and not protore.search(url):
+        url = 'http://{0}'.format(url)
+    return url
 
 class Client(clients.RpcProxy):
     """
@@ -21,9 +36,9 @@ class Client(clients.RpcProxy):
         - `url`:
         - `timeout`:
         """
-        self.url = url
+        self.url = _protocolise(url)
         self.timeout = timeout
-        self._proxy = xmlrpclib.ServerProxy(url)
+        self._proxy = xmlrpclib.ServerProxy(self.url)
 
     def _apicall(self, *args, **kwargs):
         """
@@ -32,7 +47,20 @@ class Client(clients.RpcProxy):
         method = args[1]
         return getattr(self._proxy, method)(*args[2:], **kwargs)
 
+def chain(*args, **kwargs ):
+    """
+    Will return an iterable which can be .chain()'ed as much as you
+    like to create multiple Clients.
 
+    >>> chain("localhost").chain("example.com")
+    ... [<XML RPC Client for localhost>, <XML RPC Client for example.com>]
+    """
+    return chains.client_chain(Client, *args, **kwargs)
+
+"""
+Server Implementation
+----------------------
+"""
 class Server(servers.Server):
     """
     An XML RPC server

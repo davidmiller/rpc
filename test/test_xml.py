@@ -18,6 +18,38 @@ class Handler(object):
     def sayhi(self, person):
         return "Hi " + person
 
+class ProtocoliseTestCase(unittest.TestCase):
+
+    def test_leave_it_alone(self):
+        """ These are already valid, leave them be"""
+        cases = [
+            'http://example.com',
+            'https://example.com'
+            ]
+        for case in cases:
+            self.assertEqual(case, xmlrpc._protocolise(case))
+
+    def test_protocolise(self):
+        """ Add HTTP! """
+        cases = [
+            ('localhost/xmlrpc',   'http://localhost/xmlrpc'),
+            ('example.com', 'http://example.com')
+            ]
+        for case, exp in cases:
+            self.assertEqual(exp, xmlrpc._protocolise(case))
+
+    def test_typo_dont_guess(self):
+        """ Probably typos don't guess though """
+        cases = [
+            'http//example.com',
+            'http:/example.com',
+            'https:example.com',
+            'jttp://example.com',
+            ]
+        for case in cases:
+            self.assertEqual(case, xmlrpc._protocolise(case))
+
+
 class XmlClientTestCase(unittest.TestCase):
     def setUp(self):
         self.c = xmlrpc.Client('http://localhost/xmlrpc')
@@ -40,8 +72,30 @@ class XmlClientTestCase(unittest.TestCase):
         self.c.ping()
         mock_proxy.ping.assert_called_once_with()
 
+    def test_imply_http(self):
+        """ If no protocol specified default to http """
+        c = xmlrpc.Client('localhost/xmlrpc')
+        self.assertEqual('http://localhost/xmlrpc', c.url)
+
     def tearDown(self):
         pass
+
+
+class ChainTestCase(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def test_chain(self):
+        """ Chain XML RPC Clients"""
+        one, two = xmlrpc.chain("http://localhost").chain("http://example.com")
+        self.assertEqual(one.url, "http://localhost")
+        self.assertEqual(two.url, "http://example.com")
+        for i in [one, two]:
+            self.assertIsInstance(i, xmlrpc.Client)
+
+    def tearDown(self):
+        pass
+
 
 class ServerTestCase(unittest.TestCase):
     def setUp(self):
