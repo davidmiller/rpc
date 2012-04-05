@@ -8,5 +8,5 @@ requests==0.10.6
 wsgiref==0.1.2
 mock
 unittest2
-thrift
-pytest
+thrift==0.8.0
+pytest==2.2.3
