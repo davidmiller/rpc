@@ -10,3 +10,7 @@ Because you too can have nice things
     ...     print c.ping()
 
 Check out the documentation: http://www.deadpansincerity.com/docs/rpc
+
+.. image:: https://secure.travis-ci.org/davidmiller/rpc.png?branch=master
+   :alt: Build Status
+   :target: https://secure.travis-ci.org/davidmiller/rpc
