@@ -30,6 +30,7 @@ setup(
         "Topic :: Software Development :: Libraries"
         ],
     packages = ['rpc'],
-    install_requires = ["WebOb==1.2b3",
-                "requests==0.10.6"]
+    install_requires = [
+        "WebOb==1.2b3",
+        "requests==0.10.6"]
     )
