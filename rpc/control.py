@@ -98,10 +98,10 @@ class Controller(object):
 
         Returns: a tuple consisting of (ServerClass, HandlerClass)
         """
-        smod, sklass = self.conf.get("server", "server").rsplit(".", 1)
+        smod, sklass = self.conf.get("rpctl", "server").rsplit(".", 1)
         smod = import_module(smod)
         sklass = getattr(smod, sklass)
-        hmod, hklass = self.conf.get("server", "handler").rsplit(".", 1)
+        hmod, hklass = self.conf.get("rpctl", "handler").rsplit(".", 1)
         hmod = import_module(hmod)
         hklass = getattr(hmod, hklass)
         return sklass, hklass
@@ -111,14 +111,14 @@ class Controller(object):
         """
         Return the host or Unknown
         """
-        return self.conf.get("server","host", "Unknown")
+        return self.conf.get("rpctl","host", "Unknown")
 
     @property
     def port(self):
         """
         Return the port or Unknown
         """
-        return self.conf.get("server","port", "Unknown")
+        return self.conf.get("rpctl","port", "Unknown")
 
     @property
     def pidpath(self):
@@ -128,7 +128,7 @@ class Controller(object):
         Either read from the configfile or /tmp/rpc/host:port.pid
         """
         default = "/tmp/rpc/{0}:{1}.pid".format(self.host, self.port)
-        return self.conf.get("server", "pidfile", default)
+        return self.conf.get("rpctl", "pidfile", default)
 
     def start(self):
         """
@@ -144,12 +144,14 @@ class Controller(object):
         """
         Stop an instance of the server represented by this controller
         """
+        print("Stoping Server at {0}:{0}".format(self.host, self.port))
         return self.daemon.stop()
 
     def restart(self):
         """
         Restart an instance of the server represented by this controller
         """
+        print("Re-starting Server at {0}:{0}".format(self.host, self.port))
         return self.daemon.restart()
 
     def reload(self):
@@ -178,11 +180,11 @@ def genconfig(args):
     handler = raw_input("Handler class: ").strip()
     server = raw_input("Server class: ").strip()
     conf = ConfigParser.SafeConfigParser()
-    conf.add_section("server")
-    conf.set("server", "host", host)
-    conf.set("server", "port", port)
-    conf.set("server", "handler", handler)
-    conf.set("server", "server", server)
+    conf.add_section("rpctl")
+    conf.set("rpctl", "host", host)
+    conf.set("rpctl", "port", port)
+    conf.set("rpctl", "handler", handler)
+    conf.set("rpctl", "server", server)
     with open(args.target, 'w') as fh:
         conf.write(fh)
     print("Finished! - your new config file is at {0}".format(args.target))
