@@ -47,6 +47,11 @@ By abstracting away the mechanics of associating your function handlers from pro
 
 :ref:`servers`
 
+Not only that, but you also have easy ways to perform common tasks like daemonizing your
+servers, and providing start/stop scripts for them
+
+:ref:`rpctl`
+
 API Docs
 --------
 
