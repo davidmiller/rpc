@@ -12,7 +12,7 @@ from mock import patch
 from rpc import control, exceptions, ini, jsonrpc, servers
 
 SERVERCONF = """
-[server]
+[rpctl]
 host = 0.0.0.0
 port = 4567
 handler = ConfigParser.ConfigParser
