@@ -10,7 +10,7 @@ from wsgiref import simple_server
 
 import webob
 
-from rpc import exceptions
+from rpc import daemon, exceptions
 
 def webobify(fn):
     """
@@ -59,6 +59,14 @@ class Server(object):
         return "<{flavour} Server on {host}:{port} calling {handler}>".format(
             flavour=self.flavour, host=self.host, port=self.port,
             handler=self.handler.__class__.__name__)
+
+    def __eq__(self, other):
+        try:
+            return self.flavour == other.flavour and self.host == other.host \
+              and self.port == other.port and \
+              self.handler.__class__ == other.handler.__class__
+        except AttributeError:
+            return False
 
     def __del__(self):
         """
@@ -172,4 +180,26 @@ class HTTPServer(Server):
         environ.
         """
         raise NotImplementedError()
+
+class ServerDaemon(daemon.Daemon):
+    """
+    Implements a well behaved UNIX Daemon to run our Servers.
+    """
+
+    def __init__(self, server, pidfile, **kwargs):
+        """
+        Stores the server instance we want to operate on, and sets up the
+        pidfile and other daemon variables.
+        """
+        daemon.Daemon.__init__(self, pidfile, **kwargs)
+        self.server = server
+        self.pidfile = pidfile
+
+    def run(self):
+        """
+        Implement the final hook of our Daemon class - actually serving
+        requests with the server!
+        """
+        self.server.serve()
+
 

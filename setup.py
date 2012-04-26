@@ -29,8 +29,11 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries"
         ],
+    scripts = ['bin/rpctl'],
     packages = ['rpc'],
     install_requires = [
+        "argparse",
+        "python-daemon==1.5.5",
         "WebOb==1.2b3",
         "requests==0.10.6"]
     )

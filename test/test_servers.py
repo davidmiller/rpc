@@ -126,6 +126,26 @@ class HTTPServerTestCase(unittest.TestCase):
         pass
 
 
+class ServerDaemonTestCase(unittest.TestCase):
+    def setUp(self):
+        self.serv = servers.Server("example.com", 4545, Handler)
+        self.daemon = servers.ServerDaemon(self.serv, '/tmp/example.com')
+
+    def test_init(self):
+        """ Store the server instance."""
+        self.assertEqual(self.serv, self.daemon.server)
+        self.assertEqual('/tmp/example.com', self.daemon.pidfile)
+
+    def test_run(self):
+        """ Run the server """
+        with patch.object(self.serv, 'serve') as Pserv:
+            self.daemon.run()
+            Pserv.assert_called_once_with()
+
+    def tearDown(self):
+        pass
+
+
 
 if __name__ == '__main__':
     unittest.main()

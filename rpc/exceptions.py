@@ -3,14 +3,20 @@ rpc.exceptions
 
 Common exceptions across modules
 """
-class IdError(Exception):
+class Error(Exception):
+    "Base Error class for exceptions in the rpc package"
+
+class IdError(Error):
     "API endpoint returned a query with the wrong ID"
 
-class RemoteException(Exception):
+class Remoteerror(Error):
     "The remote system raised an exception of some sort"
 
-class ConnectionError(Exception):
+class ConnectionError(Error):
     "Failed to connect to an interface with the passed params"
 
-class PortInUseError(Exception):
+class PortInUseError(Error):
     "User tried to start a server on a port that was in use"
+
+class InvalidIniError(Error):
+    "The INI file we tried to parse was no good."
