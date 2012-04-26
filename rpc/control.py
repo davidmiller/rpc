@@ -1,38 +1,8 @@
 """
 rpc.control
 ===========
-
-A generic pattern for controling RPC servers.
-
-Having written a server implementation, we often want to run those servers.
-
-While running from a shell is fine for a while, and many people will want to
-embed in a WSGI environment, other times, you just want a simle server daemon
-without too much fuss.
-
-If this is your thing, then the rpc.control module is for you.
-
-Configuration
--------------
-
-RPC-based servers need a configuration file.
-
-This can be called/placed anywhere you like, but must be in .ini format:
-:
-
-    [server]
-    host = 0.0.0.0
-    port = 4567
-    handler = mymodule.Handler
-    server = rpc.jsonrpc.Server
-
-rpctl
------
-
-rpctl is a generic RPC server control program.
 """
 import ConfigParser
-import errno
 import os
 import sys
 
