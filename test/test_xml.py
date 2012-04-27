@@ -18,44 +18,12 @@ class Handler(object):
     def sayhi(self, person):
         return "Hi " + person
 
-class ProtocoliseTestCase(unittest.TestCase):
-
-    def test_leave_it_alone(self):
-        """ These are already valid, leave them be"""
-        cases = [
-            'http://example.com',
-            'https://example.com'
-            ]
-        for case in cases:
-            self.assertEqual(case, xmlrpc._protocolise(case))
-
-    def test_protocolise(self):
-        """ Add HTTP! """
-        cases = [
-            ('localhost/xmlrpc',   'http://localhost/xmlrpc'),
-            ('example.com', 'http://example.com')
-            ]
-        for case, exp in cases:
-            self.assertEqual(exp, xmlrpc._protocolise(case))
-
-    def test_typo_dont_guess(self):
-        """ Probably typos don't guess though """
-        cases = [
-            'http//example.com',
-            'http:/example.com',
-            'https:example.com',
-            'jttp://example.com',
-            ]
-        for case in cases:
-            self.assertEqual(case, xmlrpc._protocolise(case))
-
-
 class XmlClientTestCase(unittest.TestCase):
     def setUp(self):
         self.c = xmlrpc.Client('http://localhost/xmlrpc')
 
     def test_repr(self):
-        """ Do we sting nicely?"""
+        """ Do we string nicely?"""
         expected = '<XML RPC Client for http://localhost/xmlrpc>'
         self.assertEqual(expected, str(self.c))
 
@@ -76,9 +44,6 @@ class XmlClientTestCase(unittest.TestCase):
         """ If no protocol specified default to http """
         c = xmlrpc.Client('localhost/xmlrpc')
         self.assertEqual('http://localhost/xmlrpc', c.url)
-
-    def tearDown(self):
-        pass
 
 
 class ChainTestCase(unittest.TestCase):

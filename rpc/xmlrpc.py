@@ -3,25 +3,10 @@ This module acts as a wrapper around the standard library's xmlrpc module(s)
 
 
 """
-import re
 import SimpleXMLRPCServer
-import urlparse
 import xmlrpclib
 
-from rpc import chains, clients, servers
-
-def _protocolise(url):
-    """
-    Given a URL, check to see if there is an assocaited protocol.
-
-    If not, set the protocol to HTTP and return the protocolised URL
-    """
-    # Use the regex to match http//localhost/something
-    protore = re.compile(r'https?:{0,1}/{1,2}')
-    parsed = urlparse.urlparse(url)
-    if not parsed.scheme and not protore.search(url):
-        url = 'http://{0}'.format(url)
-    return url
+from rpc import chains, clients, servers, urlhelp
 
 class Client(clients.RpcProxy):
     """
@@ -43,7 +28,7 @@ class Client(clients.RpcProxy):
         - `url`:
         - `timeout`:
         """
-        self.url = _protocolise(url)
+        self.url = urlhelp.protocolise(url)
         self.timeout = timeout
         self._proxy = xmlrpclib.ServerProxy(self.url)
 
