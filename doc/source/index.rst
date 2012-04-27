@@ -60,11 +60,16 @@ API Docs
 
    modules/chain
    modules/clients
+   modules/control
+   modules/daemon
    modules/exceptions
+   modules/ini
    modules/jsonp
    modules/jsonrpc
    modules/servers
    modules/thrifty
+   modules/urlhelp
+   modules/xmlrpc
 
 Indices and tables
 ==================
