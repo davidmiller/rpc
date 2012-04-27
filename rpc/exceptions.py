@@ -9,7 +9,7 @@ class Error(Exception):
 class IdError(Error):
     "API endpoint returned a query with the wrong ID"
 
-class Remoteerror(Error):
+class RemoteError(Error):
     "The remote system raised an exception of some sort"
 
 class ConnectionError(Error):
@@ -20,3 +20,6 @@ class PortInUseError(Error):
 
 class InvalidIniError(Error):
     "The INI file we tried to parse was no good."
+
+class IndecipherableResponseError(Error):
+    "A remote server returned a response which is indecipherable using the current protocol"
