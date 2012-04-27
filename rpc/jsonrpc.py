@@ -9,7 +9,7 @@ import uuid
 
 import requests
 
-from rpc import exceptions, clients, servers, chains
+from rpc import exceptions, clients, servers, chains, urlhelp
 
 """
 Client Implementation
@@ -39,7 +39,7 @@ class Client(clients.RpcProxy):
         - `timeout`: number
         - `verb`: HTTP verb to use
         """
-        self.url = url
+        self.url = urlhelp.protocolise(url)
         self.timeout = timeout
         self.verb = verb
 
@@ -105,15 +105,17 @@ class Client(clients.RpcProxy):
         - `reqid`: str
         - `resp`: requests.Response
         """
-        result = json.loads(resp.text)
+        if resp.status_code == 500:
+            raise exceptions.RemoteError(resp.content)
+        try:
+            result = json.loads(resp.text)
+        except ValueError:
+            raise exceptions.IndecipherableResponseError("Unable to load JSON from response")
         if reqid != result['id']:
             raise exceptions.IdError("API Endpoint returned with id:{ret}, expecting:{exp}".format(
                 ret=result['id'], exp=reqid))
         del result['id']
-        if resp.status_code == 200:
-            return result
-        else:
-            raise exceptions.RemoteException(result['result'])
+        return result
 
 
 def chain(*args, **kwargs ):

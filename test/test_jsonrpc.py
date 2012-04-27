@@ -81,6 +81,22 @@ class ClientTestCase(unittest.TestCase):
         result = self.c._parse_resp("FOO", resp)
         self.assertEqual(dict(result="pong", error=None), result)
 
+    def test_parse_response_500(self):
+        """ Deal gracefully with 500 errors """
+        resp = Mock(name="Mock Response")
+        resp.text = 'A Server error occurred. Please contact the administrator.'
+        resp.status_code = 500
+        with self.assertRaises(exceptions.RemoteError):
+            self.c._parse_resp("FOO", resp)
+
+    def test_parse_response_invalid_json(self):
+        """ Deal gracefully with an invaldi JSON response """
+        resp = Mock(name="Mock Response")
+        resp.text = 'A Server error occurred. Please contact the administrator.'
+        resp.status_code = 200
+        with self.assertRaises(exceptions.IndecipherableResponseError):
+            self.c._parse_resp("FOO", resp)
+
     def test_wrong_id(self):
         """ Raise due to wrong ID """
         resp = Mock(name="Mock Response")
@@ -89,8 +105,10 @@ class ClientTestCase(unittest.TestCase):
         with self.assertRaises(exceptions.IdError):
             self.c._parse_resp("FOO2", resp)
 
-    def tearDown(self):
-        pass
+    def test_imply_http(self):
+        """ If no protocol is specified default to http """
+        c = jsonrpc.Client("localhost/jsonrpc")
+        self.assertEqual('http://localhost/jsonrpc', c.url)
 
 
 class ChainTestCase(unittest.TestCase):
@@ -100,8 +118,8 @@ class ChainTestCase(unittest.TestCase):
     def test_chain(self):
         """ Chain JSON RPC Clients"""
         one, two = jsonrpc.chain("localhost").chain("example.com")
-        self.assertEqual(one.url, "localhost")
-        self.assertEqual(two.url, "example.com")
+        self.assertEqual(one.url, "http://localhost")
+        self.assertEqual(two.url, "http://example.com")
 
     def tearDown(self):
         pass
