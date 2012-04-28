@@ -25,7 +25,7 @@ setup(
         "Programming Language :: Python :: 2.6",
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: OS Independent",
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries"
         ],
@@ -33,7 +33,6 @@ setup(
     packages = ['rpc'],
     install_requires = [
         "argparse",
-        "python-daemon==1.5.5",
         "WebOb==1.2b3",
         "requests==0.10.6"]
     )
