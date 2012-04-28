@@ -8,9 +8,10 @@ import functools
 import socket
 from wsgiref import simple_server
 
+import doublefork
 import webob
 
-from rpc import daemon, exceptions
+from rpc import exceptions
 
 def webobify(fn):
     """
@@ -181,7 +182,7 @@ class HTTPServer(Server):
         """
         raise NotImplementedError()
 
-class ServerDaemon(daemon.Daemon):
+class ServerDaemon(doublefork.Daemon):
     """
     Implements a well behaved UNIX Daemon to run our Servers.
     """
@@ -191,7 +192,7 @@ class ServerDaemon(daemon.Daemon):
         Stores the server instance we want to operate on, and sets up the
         pidfile and other daemon variables.
         """
-        daemon.Daemon.__init__(self, pidfile, **kwargs)
+        doublefork.Daemon.__init__(self, pidfile, **kwargs)
         self.server = server
         self.pidfile = pidfile
 

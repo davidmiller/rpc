@@ -74,6 +74,21 @@ class Controller(object):
         return "<Rpc Server Controller for {0}:{1}>".format(
             self.host, self.port)
 
+    def _getklasses(self):
+        """
+        Based on the current configfile, load the appropriate server and
+        handler classes.
+
+        Returns: a tuple consisting of (ServerClass, HandlerClass)
+        """
+        smod, sklass = self.conf.get("rpctl", "server").rsplit(".", 1)
+        smod = import_module(smod)
+        sklass = getattr(smod, sklass)
+        hmod, hklass = self.conf.get("rpctl", "handler").rsplit(".", 1)
+        hmod = import_module(hmod)
+        hklass = getattr(hmod, hklass)
+        return sklass, hklass
+
     @staticmethod
     def fromargs(target):
         """
@@ -90,21 +105,6 @@ class Controller(object):
             control = Controller(args.config)
             getattr(control, target)()
         return factory
-
-    def _getklasses(self):
-        """
-        Based on the current configfile, load the appropriate server and
-        handler classes.
-
-        Returns: a tuple consisting of (ServerClass, HandlerClass)
-        """
-        smod, sklass = self.conf.get("rpctl", "server").rsplit(".", 1)
-        smod = import_module(smod)
-        sklass = getattr(smod, sklass)
-        hmod, hklass = self.conf.get("rpctl", "handler").rsplit(".", 1)
-        hmod = import_module(hmod)
-        hklass = getattr(hmod, hklass)
-        return sklass, hklass
 
     @property
     def host(self):
@@ -228,7 +228,7 @@ def main():
     """
     The Commandline Entrypoint for the rpctl script.
 
-    Herein we parse the commandline arguments, initialize a Controller,
+    Herein we parse the commandline arguments, initialize a RPController,
     and dispatch to the relevant method.
     """
     parser = ui()

@@ -11,3 +11,4 @@ unittest2
 thrift==0.8.0
 pytest==2.2.3
 argparse
+doublefork
