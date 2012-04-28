@@ -2,12 +2,32 @@
 Daemon Utilities
 
 This code is based on the work of  Sander Marechal's Simple Unix Daemon
+
+http://www.jejik.com/articles/2007/02/a_simple_unix_linux_daemon_in_python/
 """
 import atexit
+import errno
 import os
 from signal import SIGTERM
 import sys
 import time
+
+def _pid_exists(pid):
+    """
+    Predicate function to check whether the process ``pid`` exists.
+    *nix only.
+
+    Arguments:
+    - `pid`: integer value of the process ID
+    """
+    if pid < 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except OSError, e:
+        return e.errno == errno.EPERM
+    else:
+        return True
 
 class Daemon:
     """
@@ -20,6 +40,17 @@ class Daemon:
         self.stdout = stdout
         self.stderr = stderr
         self.pidfile = pidfile
+
+    @property
+    def pid(self):
+        """
+        Get the Process ID of this daemon
+
+        Return: Either the integer value of the process ID or None.
+        """
+        if os.path.exists(self.pidfile):
+            return int(open(self.pidfile, 'r').read().strip())
+        return
 
     def daemonize(self):
         """
@@ -127,6 +158,16 @@ class Daemon:
         """
         self.stop()
         self.start()
+
+    def running(self):
+        """
+        Predicate function to determine whether the daemon is
+        currently running
+        """
+        pid = self.pid
+        if not pid:
+            return False
+        return _pid_exists(pid)
 
     def run(self):
         """

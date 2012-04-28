@@ -144,14 +144,14 @@ class Controller(object):
         """
         Stop an instance of the server represented by this controller
         """
-        print("Stoping Server at {0}:{0}".format(self.host, self.port))
+        print("Stoping Server at {0}:{1}".format(self.host, self.port))
         return self.daemon.stop()
 
     def restart(self):
         """
         Restart an instance of the server represented by this controller
         """
-        print("Re-starting Server at {0}:{0}".format(self.host, self.port))
+        print("Re-starting Server at {0}:{1}".format(self.host, self.port))
         return self.daemon.restart()
 
     def reload(self):
@@ -164,7 +164,10 @@ class Controller(object):
         """
         Check the status of the server represented by this controller
         """
-        raise NotImplementedError()
+        if self.daemon.running():
+            print("Server running at {0}:{0}".format(self.host, self.port))
+        else:
+            print("Server not running")
 
 def genconfig(args):
     """
@@ -210,6 +213,10 @@ def ui():
     prestart = subparsers.add_parser("restart", help="Restart an RPC server")
     prestart.add_argument("config", type=str, help="rpctl config file")
     prestart.set_defaults(func=Controller.fromargs('restart'))
+
+    pstatus = subparsers.add_parser("status", help="Is this server currently running?")
+    pstatus.add_argument("config", type=str, help="rpctl config file")
+    pstatus.set_defaults(func=Controller.fromargs('status'))
 
     pgenerate = subparsers.add_parser("generate", help="Generate a boilerplate RPC configfile")
     pgenerate.add_argument("target", type=str, help="Location to put the file once generated")
