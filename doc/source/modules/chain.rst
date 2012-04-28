@@ -1,7 +1,7 @@
 .. _rpc.chain:
 
-Chaining Instantiation
-======================
+rpc.chain
+=========
 
 .. automodule:: rpc.chain
    :members:

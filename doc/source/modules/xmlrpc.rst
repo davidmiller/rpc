@@ -1,7 +1,7 @@
 .. _rpc.xmlrpc:
 
-XML RPC
-=======
+rpc.xmlrpc
+==========
 
 .. automodule:: rpc.xmlrpc
    :members:

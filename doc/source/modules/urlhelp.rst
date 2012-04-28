@@ -1,7 +1,7 @@
 .. _rpc.urlhelp:
 
-Urlhelping Instantiation
-======================
+rpc.urlhelp
+===========
 
 .. automodule:: rpc.urlhelp
    :members:

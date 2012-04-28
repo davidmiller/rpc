@@ -1,8 +1,6 @@
 """
 rpc.chain
 
-Chaining together instantiation.
---------------------------------
 
 This module provides generic support for multiple instantiation
 """

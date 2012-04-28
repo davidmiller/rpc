@@ -1,7 +1,7 @@
 .. _rpc.jsonrpc:
 
-JSON RPC
-========
+rpc.jsonrpc
+===========
 
 .. automodule:: rpc.jsonrpc
    :members:

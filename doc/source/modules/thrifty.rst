@@ -1,7 +1,7 @@
 .. _rpc.thrifty:
 
-Thrift
-======
+rpc.thrift
+==========
 
 .. automodule:: rpc.thrifty
    :members:
