@@ -34,6 +34,7 @@ setup(
     install_requires = [
         "argparse",
         "doublefork",
+        "suds==0.4",
         "thrift==0.8.0",
         "WebOb==1.2b3",
         "requests==0.10.6"]

@@ -1,0 +1,9 @@
+WebOb==1.2b3
+certifi==0.0.8
+chardet==1.0.1
+distribute==0.6.24
+requests==0.10.6
+wsgiref==0.1.2
+mock
+thrift==0.8.0
+pytest==2.2.3
